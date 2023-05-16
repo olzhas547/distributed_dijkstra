@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Distributed Dijkstra</title>
+  </head>
+  <body>
+    {% for i in weights %}
+      <p>{{i}}</p>
+      {{weights[i]}}
+    {% endfor %}
+    <form action="distributed_dijkstra" method="post">
+      <p>Start: </p>
+      <input required type="text" name="start"/>
+      <p>Goal: </p>
+      <input required type="text" name="goal"/>
+      <input required hidden type="text" name="updates" value="{{updates}}"/>
+      <button type="submit"> Send </button>
+  </body>
