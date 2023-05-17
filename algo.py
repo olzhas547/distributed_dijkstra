@@ -9,10 +9,9 @@ def init_weights(updates: str | None = None):
     if not updates:
         updates = ''.join([str(round(3*random.random())) for i in range(100)])
     names = graph[0].to_list()
-    counter = 0
     for i, column in enumerate(names):
         for j, row in enumerate(names):
-            match float(updates[counter]):
+            match float(updates[10*i+j]):
                 case 0 if graph.at[i, row] != 0:
                     graph.at[i, row] = math.inf
                 case 1:
@@ -21,7 +20,7 @@ def init_weights(updates: str | None = None):
                     graph.at[i, row] = graph.at[i, row] * 2
                 case 3:
                     graph.at[i, row] = graph.at[i, row] * 1.5
-            counter += 1
+            print(10*i+j)
     
     graph_dict = {}
     for node in names:
