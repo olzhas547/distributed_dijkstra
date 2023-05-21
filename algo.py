@@ -20,7 +20,6 @@ def init_weights(updates: str | None = None):
                     graph.at[i, row] = graph.at[i, row] * 2
                 case 3:
                     graph.at[i, row] = graph.at[i, row] * 1.5
-            print(10*i+j)
     
     graph_dict = {}
     for node in names:
@@ -76,6 +75,3 @@ def path(parent, goal):
         path.append(vertex)
         vertex = parent[vertex]
     return path[::-1]
-
-if __name__ == '__main__':
-    check_distributed_dijkstra()
