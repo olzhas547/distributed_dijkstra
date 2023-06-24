@@ -1,34 +1,31 @@
-import pandas as pd
-from queue import PriorityQueue
 import math
-import threading
+from queue import PriorityQueue
 import random
+import threading
 
-def init_weights(updates: str | None = None):
-    graph = pd.read_excel('./graph.xlsx')
-    if not updates:
-        updates = ''.join([str(round(3*random.random())) for i in range(100)])
-    names = graph[0].to_list()
-    for i, column in enumerate(names):
-        for j, row in enumerate(names):
-            match float(updates[10*i+j]):
-                case 0 if graph.at[i, row] != 0:
-                    graph.at[i, row] = math.inf
-                case 1:
-                    graph.at[i, row] = graph.at[i, row] * 4
-                case 2:
-                    graph.at[i, row] = graph.at[i, row] * 2
-                case 3:
-                    graph.at[i, row] = graph.at[i, row] * 1.5
+import pandas as pd
+
+def distributed_dijkstra(graph: dict, start: str, goal: str) -> (dict, float):
+    '''
     
-    graph_dict = {}
-    for node in names:
-        res = pd.Series(graph[node].values,index=graph[0]).to_dict()
-        result = {(i, res[i]*1.0) for i in res if res[i] != math.inf}
-        graph_dict[node] = result
-    return graph_dict, updates
 
-def distributed_dijkstra(graph, start, goal):
+    Parameters
+    ----------
+    graph : dict
+        DESCRIPTION. Graph on which we use Dijkstra's algorithm.
+    start : str
+        DESCRIPTION. Starting point.
+    goal : str
+        DESCRIPTION. Ending point.
+
+    Returns
+    -------
+    parent : dict
+        DESCRIPTION. Reversed trace of Dijkstra's algorithm.
+    weights[goal] : float
+        DESCRIPTION. Distance between start and goal.
+
+    '''
     visited = set()
     weights = {start: 0}
     parent = {start: None}
@@ -66,7 +63,70 @@ def distributed_dijkstra(graph, start, goal):
             thread.join()
     return parent, weights[goal]
 
-def path(parent, goal):
+def init_weights(updates: str | None = None) -> (dict, str):
+    '''
+    Read map from excel and generate traffic jams and road closure.
+
+    Parameters.
+    ----------
+    updates : str | None, optional
+        DESCRIPTION. The default is None.
+        Seed of traffic jams and road closures.
+
+    Returns
+    -------
+    graph_dict : dict
+        DESCRIPTION. Graph in dictionary representation.
+    updates : str
+        DESCRIPTION. Seed of traffic jams and road closures.
+
+    '''
+    graph = pd.read_excel('./graph.xlsx')
+    
+    # Generate seed
+    # 0: road is closed
+    # 1: big traffic jam
+    # 2: low traffic jam
+    # 3: default traffic jam
+    if not updates:
+        updates = ''.join([str(round(3*random.random())) for i in range(100)])
+    names = graph[0].to_list()
+    for i, column in enumerate(names):
+        for j, row in enumerate(names):
+            match float(updates[10*i+j]):
+                case 0 if graph.at[i, row] != 0:
+                    graph.at[i, row] = math.inf
+                case 1:
+                    graph.at[i, row] = graph.at[i, row] * 4
+                case 2:
+                    graph.at[i, row] = graph.at[i, row] * 2
+                case 3:
+                    graph.at[i, row] = graph.at[i, row] * 1.5
+    
+    graph_dict = {}
+    for node in names:
+        res = pd.Series(graph[node].values,index=graph[0]).to_dict()
+        result = {(i, res[i]*1.0) for i in res if res[i] != math.inf}
+        graph_dict[node] = result
+    return graph_dict, updates
+
+def path(parent: dict, goal: str) -> list:
+    '''
+    
+
+    Parameters
+    ----------
+    parent : dict
+        DESCRIPTION. Reversed trace of Dijkstra's algorithm.
+    goal : str
+        DESCRIPTION. Ending point of path.
+
+    Returns
+    -------
+    path[::-1] : list
+        DESCRIPTION. Shortest path.
+
+    '''
     if goal not in parent:
         return None
     vertex = goal
